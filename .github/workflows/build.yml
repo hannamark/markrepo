@@ -1,0 +1,132 @@
+name: Reusable build workflow
+on:
+  workflow_call:
+    inputs:
+      environment:
+        type: string
+        required: false    
+    secrets:
+      CODACY_PROJECT_TOKEN:
+        required: false
+      BIAD_GITHUB_TOKEN:
+        required: false
+      AWS_ACCOUNT:
+        required: true
+      AWS_REGION:
+        required: true
+      AWS_ROLE:
+        required: true                
+
+permissions:
+  id-token: write
+  contents: read
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    environment: ${{ inputs.environment }} 
+    
+    steps:
+      - name: git clone the repository
+        uses: actions/checkout@v3
+        with:
+          persist-credentials: false
+        
+      - name: configure aws credentials
+        uses: aws-actions/configure-aws-credentials@v1
+        with:
+          role-to-assume: arn:aws:iam::${{secrets.AWS_ACCOUNT}}:role/${{secrets.AWS_ROLE}}
+          aws-region: us-east-1 # ${{ secrets.AWS_REGION }}
+
+        
+      - run: |
+          BIAD_GITHUB_TOKEN=$(aws secretsmanager get-secret-value --secret-id github/login --region us-east-1 | jq .SecretString | jq fromjson |jq .GIT_TOKEN -r)
+        shell: bash  
+
+      - run: git config --global url."https://BIAD:${{ secrets.BIAD_GITHUB_TOKEN }}@github.com/BIAD/".insteadOf "https://github.com/BIAD/"    
+      
+      # - run: git config --global url."https://${{ secrets.BIAD_GITHUB_TOKEN }}@github.com/".insteadOf ssh://git@github.com/
+
+      - uses: actions/setup-node@v2
+        with:
+          node-version: "16"
+          cache: 'npm'
+      - run: npm ci
+      # - name: install UI dependency
+      #   run: |          
+      #     cd frontend/runtime
+      #     npm ci
+
+      - uses: actions/setup-python@v2
+        with:
+          python-version: "3.9"
+          cache: 'pip'
+      - run: pip install -r requirements.txt
+
+      #- run: yarn install
+
+      #- name: Install dependencies
+      #  run: sh scripts/install-deps.sh
+
+      - name: Check Repo
+        run: echo "Repo - ${GITHUB_REPOSITORY}  Ref - ${GITHUB_HEAD_REF}"
+          
+      - name: Test
+        run:  |
+          bash scripts/run-tests.sh
+        shell: bash
+
+      - name: BuildLambda
+        run:  |
+          bash scripts/run-build.sh
+        shell: bash          
+
+
+      - name: CDK version
+        run: npx cdk --version
+
+      - name: Cache cdk output
+        id: cache-cdk-output
+        uses: actions/cache@v3
+        with:
+          path: |
+            cdk.out
+          key: cdk.out.${{ github.sha }}        
+
+      - name: CDK synth, checkov (https://www.checkov.io)
+        if:  ${{ steps.cache-cdk-output.outputs.cache-hit == false }}
+        run: |
+          npx cdk synth -c git_ref=${GITHUB_HEAD_REF}  -c git_repo=${GITHUB_REPOSITORY} -o cdk.out
+          checkov
+
+      - name: CDK list
+        run: npx cdk ls --app cdk.out
+
+      # - name: Cache Vue.JS
+      #   id: cache-vue-js
+      #   uses: actions/cache@v3
+      #   with:
+      #     path: |
+      #       frontend/runtime
+      #     key: frontend.${{ github.sha }}
+
+      #- name: Archive cdk  artifacts
+      #  if: ${{github.event_name == 'push'}}
+      #  uses: actions/upload-artifact@v3
+      #  with:
+      #    name: cdk.out.${{ github.sha}}
+      #    #name: cdk.out
+      #    path: |
+      #      cdk.out
+
+      #- name: configure aws credentials
+      #  if: ${{github.event_name != 'push'}}
+      #  uses: aws-actions/configure-aws-credentials@v1
+      #  with:
+      #    role-to-assume: arn:aws:iam::519746423883:role/pno-github-ci-role-nonprod
+      #    aws-region: "us-east-1"
+#
+#      #- name: CDK Deploy to Dev
+#      #  if: ${{github.event_name != 'push'}}
+      #  run: npx cdk deploy --app cdk.out "${GITHUB_HEAD_REF,,}*" --require-approval never
+      #  shell: bash
