@@ -46,7 +46,7 @@ jobs:
       - run: "echo workflow"
 
 jobs:
-  test_job:
+  test-job:
     #name: Test
     runs-on: ubuntu-latest
 
