@@ -53,8 +53,8 @@ jobs:
     steps:
       #- name: test
       - run: echo 'main-pr.yml'
-  #build:
-  #  uses: ./.github/workflows/build.yml
+  build:
+    uses: ./.github/workflows/build.yml
   #  with:
   #    environment: dev
   #  secrets:
