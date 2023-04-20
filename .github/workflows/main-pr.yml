@@ -20,13 +20,13 @@ permissions:
   id-token: write
   contents: read
 
-jobs:
-  workflow-job:
-    runs-on: ubuntu-latest
-
-    steps:
-      #- uses: actions/checkout@v2
-      - run: "echo workflow"
+#jobs:
+#  workflow-job:
+#    runs-on: ubuntu-latest
+#
+#    steps:
+#      #- uses: actions/checkout@v2
+#      - run: "echo workflow"
       
 
     #  - name: set echoing of commands on and off
@@ -36,16 +36,25 @@ jobs:
     #      echo '::set-output name=demo_action_echoing::on'
     #      echo '::echo::off'
     #      echo '::set-output name=action_echo::disabled'
+
 #jobs:
-#  test_job:
-#    #name: Test
+#  workflow-job:
 #    runs-on: ubuntu-latest
 #
 #    steps:
-#      - name: test
-#        run: echo 'main-pr.yml'
-  #build:
-  #  uses: ./.github/workflows/build.yml
+#      #- uses: actions/checkout@v2
+#      - run: "echo workflow"
+
+jobs:
+  test-job:
+    #name: Test
+    runs-on: ubuntu-latest
+
+    steps:
+      #- name: test
+      - run: echo 'main-pr.yml'
+  build:
+    uses: ./.github/workflows/build.yml
   #  with:
   #    environment: dev
   #  secrets:
