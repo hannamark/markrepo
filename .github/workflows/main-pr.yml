@@ -37,13 +37,13 @@ permissions:
     #      echo '::echo::off'
     #      echo '::set-output name=action_echo::disabled'
 
-jobs:
-  workflow-job:
-    runs-on: ubuntu-latest
-
-    steps:
-      #- uses: actions/checkout@v2
-      - run: "echo workflow"
+#jobs:
+#  workflow-job:
+#    runs-on: ubuntu-latest
+#
+#    steps:
+#      #- uses: actions/checkout@v2
+#      - run: "echo workflow"
 
 jobs:
   test-job:
