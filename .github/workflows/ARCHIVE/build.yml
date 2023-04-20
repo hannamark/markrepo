@@ -15,9 +15,7 @@ on:
       AWS_REGION:
         required: true
       AWS_ROLE:
-        required: true
-      SLACK_WEBHOOK_URL:
-        required: true            
+        required: true                
 
 permissions:
   id-token: write
@@ -26,27 +24,15 @@ permissions:
 jobs:
   build:
     runs-on: ubuntu-latest
-    environment: ${{ inputs.environment }}
-    env:
-      SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+    environment: ${{ inputs.environment }} 
     
     steps:
-    
       - name: git clone the repository
-        id: git-clone-the-repository
         uses: actions/checkout@v3
         with:
           persist-credentials: false
-      # EXIT step, used for testing to exit immediately, change 
-      ## from exit 0 to exit 1 to exit
-      #- name: EXIT
-      #  id: early
-      #  run:  | 
-      #      echo "******Webhook"
-      #      exit 0
-
+        
       - name: configure aws credentials
-        id: configure-aws-credentials
         uses: aws-actions/configure-aws-credentials@v1
         with:
           role-to-assume: arn:aws:iam::${{secrets.AWS_ACCOUNT}}:role/${{secrets.AWS_ROLE}}
@@ -83,24 +69,14 @@ jobs:
       #  run: sh scripts/install-deps.sh
 
       - name: Check Repo
-        id: Check-Repo
         run: echo "Repo - ${GITHUB_REPOSITORY}  Ref - ${GITHUB_HEAD_REF}"
           
-      #- name: Test
-      #  run:  |
-      #    bash scripts/run-tests.sh
-      #  shell: bash
-
-      - uses: act10ns/slack@v1
-        with:
-          status: starting
-          channel: '#dw-pmacc-builds'
-          #channel: ${{ secrets.SLACK_WEBHOOK_URL }}
-          message: Starting BuildLambda
-        if: always()
+      - name: Test
+        run:  |
+          bash scripts/run-tests.sh
+        shell: bash
 
       - name: BuildLambda
-        id: BuildLambda
         run:  |
           bash scripts/run-build.sh
         shell: bash          
@@ -118,21 +94,39 @@ jobs:
           key: cdk.out.${{ github.sha }}        
 
       - name: CDK synth, checkov (https://www.checkov.io)
-        id: CDK-synth-checkov
         if:  ${{ steps.cache-cdk-output.outputs.cache-hit == false }}
         run: |
           npx cdk synth -c git_ref=${GITHUB_HEAD_REF}  -c git_repo=${GITHUB_REPOSITORY} -o cdk.out
           checkov
 
       - name: CDK list
-        id: CDK-list
         run: npx cdk ls --app cdk.out
 
-      - uses: act10ns/slack@v1
-        with:
-          status: ${{ job.status }}
-          config: .github/config/slack.yml
-          steps: ${{ toJson(steps) }}
-          channel: '#dw-pmacc-builds'
-          #channel: ${{ secrets.SLACK_WEBHOOK_URL }}
-        if: always()
+      # - name: Cache Vue.JS
+      #   id: cache-vue-js
+      #   uses: actions/cache@v3
+      #   with:
+      #     path: |
+      #       frontend/runtime
+      #     key: frontend.${{ github.sha }}
+
+      #- name: Archive cdk  artifacts
+      #  if: ${{github.event_name == 'push'}}
+      #  uses: actions/upload-artifact@v3
+      #  with:
+      #    name: cdk.out.${{ github.sha}}
+      #    #name: cdk.out
+      #    path: |
+      #      cdk.out
+
+      #- name: configure aws credentials
+      #  if: ${{github.event_name != 'push'}}
+      #  uses: aws-actions/configure-aws-credentials@v1
+      #  with:
+      #    role-to-assume: arn:aws:iam::519746423883:role/pno-github-ci-role-nonprod
+      #    aws-region: "us-east-1"
+#
+#      #- name: CDK Deploy to Dev
+#      #  if: ${{github.event_name != 'push'}}
+      #  run: npx cdk deploy --app cdk.out "${GITHUB_HEAD_REF,,}*" --require-approval never
+      #  shell: bash
