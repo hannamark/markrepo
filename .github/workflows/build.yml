@@ -5,19 +5,19 @@ on:
       environment:
         type: string
         required: false    
-    secrets:
-      CODACY_PROJECT_TOKEN:
-        required: false
-      BIAD_GITHUB_TOKEN:
-        required: false
-      AWS_ACCOUNT:
-        required: true
-      AWS_REGION:
-        required: true
-      AWS_ROLE:
-        required: true
-      SLACK_WEBHOOK_URL:
-        required: true            
+#    secrets:
+#      CODACY_PROJECT_TOKEN:
+#        required: false
+#      BIAD_GITHUB_TOKEN:
+#        required: false
+#      AWS_ACCOUNT:
+#        required: true
+#      AWS_REGION:
+#        required: true
+#      AWS_ROLE:
+#        required: true
+#      SLACK_WEBHOOK_URL:
+#        required: true            
 
 permissions:
   id-token: write
