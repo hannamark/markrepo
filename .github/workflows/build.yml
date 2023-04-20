@@ -39,11 +39,11 @@ jobs:
           persist-credentials: false
       # EXIT step, used for testing to exit immediately, change 
       ## from exit 0 to exit 1 to exit
-      #- name: EXIT
-      #  id: early
-      #  run:  | 
-      #      echo "******Webhook"
-      #      exit 0
+      - name: EXIT
+        id: early
+        run:  | 
+            echo "Exiting......."
+            exit 1
 
       - name: configure aws credentials
         id: configure-aws-credentials
