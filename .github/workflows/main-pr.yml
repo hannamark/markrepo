@@ -45,14 +45,14 @@ jobs:
       #- uses: actions/checkout@v2
       - run: "echo workflow"
 
-#jobs:
-#  test_job:
-#    #name: Test
-#    runs-on: ubuntu-latest
-#
-#    steps:
-#      - name: test
-#        run: echo 'main-pr.yml'
+jobs:
+  test_job:
+    #name: Test
+    runs-on: ubuntu-latest
+
+    steps:
+      #- name: test
+      - run: echo 'main-pr.yml'
   #build:
   #  uses: ./.github/workflows/build.yml
   #  with:
