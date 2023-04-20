@@ -1,0 +1,44 @@
+name: main-pr-ready-for-review
+on:
+  pull_request:
+    branches:
+      - main
+
+    types:
+      - ready_for_review
+
+    paths-ignore:
+      - "*.md"
+      - "*.yml"
+      - 
+concurrency: 
+  group: ${{ github.ref }} 
+  cancel-in-progress: true  
+
+
+permissions:
+  id-token: write
+  contents: read
+
+jobs:
+  build:
+    uses: ./.github/workflows/build.yml
+    with:
+      environment: dev
+    secrets:
+      BIAD_GITHUB_TOKEN: ${{ secrets.BIAD_GITHUB_TOKEN }}
+      AWS_ACCOUNT: ${{ secrets.AWS_ACCOUNT }}
+      AWS_REGION: ${{ secrets.AWS_REGION }}
+      AWS_ROLE: ${{ secrets.AWS_ROLE }}         
+
+  deploy-dev:
+    uses: ./.github/workflows/deploy.yml
+    needs: build
+    with:
+      environment: dev
+      env: "dev"
+    secrets:
+      AWS_ACCOUNT: ${{ secrets.AWS_ACCOUNT }}
+      AWS_REGION: ${{ secrets.AWS_REGION }}
+      AWS_ROLE: ${{ secrets.AWS_ROLE }}        
+      

@@ -21,24 +21,48 @@ permissions:
   contents: read
 
 jobs:
-  build:
-    uses: ./.github/workflows/build.yml
-    with:
-      environment: dev
-    secrets:
-      BIAD_GITHUB_TOKEN: ${{ secrets.BIAD_GITHUB_TOKEN }}
-      AWS_ACCOUNT: ${{ secrets.AWS_ACCOUNT }}
-      AWS_REGION: ${{ secrets.AWS_REGION }}
-      AWS_ROLE: ${{ secrets.AWS_ROLE }}         
+  workflow-job:
+    runs-on: ubuntu-latest
 
-  deploy-dev:
-    uses: ./.github/workflows/deploy.yml
-    needs: build
-    with:
-      environment: dev
-      env: "dev"
-    secrets:
-      AWS_ACCOUNT: ${{ secrets.AWS_ACCOUNT }}
-      AWS_REGION: ${{ secrets.AWS_REGION }}
-      AWS_ROLE: ${{ secrets.AWS_ROLE }}        
+    steps:
+      #- uses: actions/checkout@v2
+      - run: "echo workflow"
+      
+
+    #  - name: set echoing of commands on and off
+    #    run: |
+    #      echo '::set-output name=demo_action_echoing::off'
+    #      echo '::echo::on'
+    #      echo '::set-output name=demo_action_echoing::on'
+    #      echo '::echo::off'
+    #      echo '::set-output name=action_echo::disabled'
+#jobs:
+#  test_job:
+#    #name: Test
+#    runs-on: ubuntu-latest
+#
+#    steps:
+#      - name: test
+#        run: echo 'main-pr.yml'
+  #build:
+  #  uses: ./.github/workflows/build.yml
+  #  with:
+  #    environment: dev
+  #  secrets:
+  #    BIAD_GITHUB_TOKEN: ${{ secrets.BIAD_GITHUB_TOKEN }}
+  #    AWS_ACCOUNT: ${{ secrets.AWS_ACCOUNT }}
+  #    AWS_REGION: ${{ secrets.AWS_REGION }}
+  #    AWS_ROLE: ${{ secrets.AWS_ROLE }}         
+  #    SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL}}
+  #deploy-dev:
+  #  uses: ./.github/workflows/deploy.yml
+  #  needs: build
+  #  with:
+  #    environment: dev
+  #    env: "dev"
+  #  secrets:
+  #    AWS_ACCOUNT: ${{ secrets.AWS_ACCOUNT }}
+  #    AWS_REGION: ${{ secrets.AWS_REGION }}
+  #    AWS_ROLE: ${{ secrets.AWS_ROLE }}
+  #    SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL}}       
       
